@@ -36,7 +36,7 @@ public class UI : MonoBehaviour
 #pragma warning restore 649
 
 	// Publics:
-	public UIExplanation explanation { get; private set; }
+	public UIExplanationScreen explanation { get; private set; }
 	public UIImage background { get; private set; }
 	public UIButton pauseButton { get; private set; }
 	public UIStartScreen startScreen { get; private set; }
@@ -47,6 +47,7 @@ public class UI : MonoBehaviour
 	public CountDown countdown => _countdown;
 	public VisualTimer timer => _timer;
 
+	private List<IUIScreen> _screens = new List<IUIScreen>();
 	private IEnumerator _coroutine;
 
 
@@ -63,25 +64,28 @@ public class UI : MonoBehaviour
 		pauseButton = new UIButton(_buttonPause, () => { StateManager.gameEvent.Invoke(GameEvent.Pause); });
 
 		background = new UIImage(_backgroundImage);
-		explanation = new UIExplanation(new UIText(_explanationText), buttonLetsGo);
-		startScreen = new UIStartScreen(new UIText(_titleText), buttonEasy, buttonMedium, buttonHard);
-		pauseScreen = new UIPauseScreen(new UIText(_pauseText), buttonContinue, buttonRestart, buttonGoHome);
-		scoresScreen = new UIScoresScreen(_scoreText, _hiscoreText, _lifeCounterObjects);
-		gameOver = new UIGameOverScreen(new UIText(_gameOverText), buttonRestart, buttonGoHome);
+		explanation = new UIExplanationScreen(this, new UIText(_explanationText), buttonLetsGo);
+		startScreen = new UIStartScreen(this, new UIText(_titleText), buttonEasy, buttonMedium, buttonHard);
+		pauseScreen = new UIPauseScreen(this, new UIText(_pauseText), buttonContinue, buttonRestart, buttonGoHome);
+		scoresScreen = new UIScoresScreen(this, _scoreText, _hiscoreText, _lifeCounterObjects);
+		gameOver = new UIGameOverScreen(this, new UIText(_gameOverText), buttonRestart, buttonGoHome);
 
 		timer.completeAction = () => StateManager.gameEvent.Invoke(GameEvent.GameOver);
 	}
 
 	private void Start()
 	{
-		StateManager.gameEvent.AddListener((GameEvent e) =>
+		StateManager.gameEvent.AddLidadddstener((GameEvent e) =>
 		{
 			switch (e)
 			{
 				case GameEvent.GoHome:
+					gameOver.Hide();
 					pauseButton.Hide();
 					scoresScreen.Hide();
 					startScreen.Show();
+					timer.Reset();
+					timer.Hide();
 					break;
 
 				case GameEvent.ShowExplanation:
@@ -124,6 +128,18 @@ public class UI : MonoBehaviour
 		});
 	}
 
+	public void AddActiveScreen(IUIScreen screen)
+	{
+		if (_screens.Contains(screen)) return;
+		_screens.Add(screen);
+	}
+
+	public void RemoveActiveScreen(IUIScreen screen)
+	{
+		if (!_screens.Contains(screen)) return;
+		_screens.Remove(screen);
+	}
+
 	private IEnumerator ShowExplanation(float delay)
 	{
 		explanation.text = Model.levelData;
@@ -142,7 +158,7 @@ public class UI : MonoBehaviour
 		countdown.StartCountDown(() =>
 		{
 			StateManager.gameEvent.Invoke(GameEvent.StartGame);
-		});
+		}, .3f);
 		yield return null;
 	}
 }
@@ -161,6 +177,7 @@ General purpose Image which has all tweening-functionality inside
 // TODO: Implement the UITweenType
 public enum UITweenType { Fade, Move, Scale }
 public interface IUIElement { void Show(); void Hide(); }
+public interface IUIScreen { void Show(); void Hide(); }
 
 public class UIImage : IUIElement
 {
@@ -319,8 +336,9 @@ public class UIButton : IUIElement
 <summary>
 </summary>
 */
-public class UIExplanation
+public class UIExplanationScreen : IUIScreen
 {
+	private UI _ui;
 	private UIText _text;
 	private UIButton _letsGoButton;
 	private List<IUIElement> _elements;
@@ -334,8 +352,9 @@ public class UIExplanation
 		}
 	}
 
-	public UIExplanation(UIText text, UIButton letsGoButton)
+	public UIExplanationScreen(UI ui, UIText text, UIButton letsGoButton)
 	{
+		_ui = ui;
 		_text = text;
 		_letsGoButton = letsGoButton;
 		_elements = new List<IUIElement>() { GameController.refs.ui.background, _text, _letsGoButton };
@@ -347,6 +366,7 @@ public class UIExplanation
 		IsShowing = true;
 
 		_elements.ForEach(el => el.Show());
+		_ui.AddActiveScreen(this);
 	}
 
 	public void Hide()
@@ -355,6 +375,7 @@ public class UIExplanation
 		IsShowing = false;
 
 		_elements.ForEach(el => el.Hide());
+		_ui.RemoveActiveScreen(this);
 	}
 }
 
@@ -362,15 +383,17 @@ public class UIExplanation
 <summary>
 </summary>
 */
-public class UIStartScreen
+public class UIStartScreen : IUIScreen
 {
+	private UI _ui;
 	private UIText _titleText;
 	private List<IUIElement> _elements;
 
 	public bool IsShowing = false;
 
-	public UIStartScreen(UIText titleText, UIButton buttonEasy, UIButton buttonMedium, UIButton buttonHard)
+	public UIStartScreen(UI ui, UIText titleText, UIButton buttonEasy, UIButton buttonMedium, UIButton buttonHard)
 	{
+		_ui = ui;
 		_titleText = titleText;
 		_elements = new List<IUIElement>() { GameController.refs.ui.background, titleText, buttonEasy, buttonMedium, buttonHard };
 	}
@@ -381,6 +404,7 @@ public class UIStartScreen
 		IsShowing = true;
 
 		_elements.ForEach(el => el.Show());
+		_ui.AddActiveScreen(this);
 	}
 
 	public void Hide()
@@ -389,6 +413,7 @@ public class UIStartScreen
 		IsShowing = false;
 
 		_elements.ForEach(el => el.Hide());
+		_ui.RemoveActiveScreen(this);
 	}
 }
 
@@ -397,12 +422,14 @@ public class UIStartScreen
 When the game pauses the game this handles all the items of the pause-screen
 </summary>
 */
-public class UIPauseScreen
+public class UIPauseScreen : IUIScreen
 {
+	private UI _ui;
 	private List<IUIElement> _elements;
 
-	public UIPauseScreen(UIText pauseText, UIButton continueButton, UIButton restartButton, UIButton goHomeButton)
+	public UIPauseScreen(UI ui, UIText pauseText, UIButton continueButton, UIButton restartButton, UIButton goHomeButton)
 	{
+		_ui = ui;
 		_elements = new List<IUIElement>() { GameController.refs.ui.background, pauseText, continueButton, restartButton, goHomeButton };
 	}
 
@@ -414,6 +441,7 @@ public class UIPauseScreen
 	public void Show()
 	{
 		_elements.ForEach(el => el.Show());
+		_ui.AddActiveScreen(this);
 	}
 
 	/**
@@ -423,6 +451,7 @@ public class UIPauseScreen
 	public void Hide()
 	{
 		_elements.ForEach(el => el.Hide());
+		_ui.RemoveActiveScreen(this);
 	}
 }
 
@@ -430,8 +459,9 @@ public class UIPauseScreen
 <summary>
 </summary>
 */
-public class UIScoresScreen
+public class UIScoresScreen : IUIScreen
 {
+	private UI _ui;
 	private TextMeshProUGUI _scoreText;
 	private TextMeshProUGUI _hiscoreText;
 	private LifeCounterObjects _lifeCounterObjects;
@@ -441,8 +471,9 @@ public class UIScoresScreen
 	private float hideYPos = 80f;
 	private float showYPos = -82.2f;
 
-	public UIScoresScreen(TextMeshProUGUI scoreText, TextMeshProUGUI hiscoreText, LifeCounterObjects lifeCounterObjects)
+	public UIScoresScreen(UI ui, TextMeshProUGUI scoreText, TextMeshProUGUI hiscoreText, LifeCounterObjects lifeCounterObjects)
 	{
+		_ui = ui;
 		_scoreText = scoreText;
 		_hiscoreText = hiscoreText;
 		_lifeCounterObjects = lifeCounterObjects;
@@ -471,6 +502,7 @@ public class UIScoresScreen
 		_hiscoreTextRT.DOAnchorPosY(showYPos, duration).SetEase(ease);
 		_lifeCounterObjects.Show();
 
+		_ui.AddActiveScreen(this);
 	}
 
 	public void Hide()
@@ -486,6 +518,7 @@ public class UIScoresScreen
 			_hiscoreText.gameObject.SetActive(false);
 		});
 		_lifeCounterObjects.Hide();
+		_ui.RemoveActiveScreen(this);
 	}
 
 	public void UpdateScore()
@@ -499,22 +532,26 @@ public class UIScoresScreen
 <summary>
 </summary>
 */
-public class UIGameOverScreen
+public class UIGameOverScreen : IUIScreen
 {
+	private UI _ui;
 	private List<IUIElement> _elements;
 
-	public UIGameOverScreen(UIText gameOverText, UIButton restartButton, UIButton goHomeButton)
+	public UIGameOverScreen(UI ui, UIText gameOverText, UIButton restartButton, UIButton goHomeButton)
 	{
+		_ui = ui;
 		_elements = new List<IUIElement>() { GameController.refs.ui.background, gameOverText, restartButton, goHomeButton };
 	}
 
 	public void Show()
 	{
 		_elements.ForEach(el => el.Show());
+		_ui.AddActiveScreen(this);
 	}
 
 	public void Hide()
 	{
 		_elements.ForEach(el => el.Hide());
+		_ui.RemoveActiveScreen(this);
 	}
 }

@@ -20,8 +20,6 @@ public class Engine : MonoBehaviour
 
 	private void Start()
 	{
-
-		// Setup the GameEvent-listener:
 		StateManager.gameEvent.AddListener((GameEvent e) =>
 		{
 			switch (e)
@@ -40,7 +38,6 @@ public class Engine : MonoBehaviour
 				
 				case GameEvent.Whack:
 					if (_coroutine != null) StopCoroutine(_coroutine);
-					Debug.Log("Whackoooo:"+_coroutine);
 					StartCoroutine(_coroutine);
 					break;
 
@@ -59,14 +56,12 @@ public class Engine : MonoBehaviour
 
 		// 2. Take a random mole from that list:
 		Mole m = activeMoles[Random.Range(0, activeMoles.Count)];
-		// Mole m = activeMoles[Random.Range(0, activeMoles.ToArray().Length)];
 
 		// 3. Show it
 		m.Show();
 
 		_startSpeed = Mathf.Clamp(_startSpeed - .15f, .25f, float.MaxValue);
 		Debug.Log(_startSpeed);
-		// Invoke("Floep", _startSpeed);
 		yield return new WaitForSeconds(_startSpeed);
 		StartCoroutine(_coroutine);
 		yield return null;
@@ -81,8 +76,6 @@ public class Engine : MonoBehaviour
 			List<GameObject> moles = GameController.refs.prefabs.levelEasy.moles;
 
 			int index = Random.Range(0, moles.Count);
-			Debug.Log("index: " + index);
-
 			_moles.Add(Instantiate<GameObject>(moles[index], _placeholders[i].transform.position, Quaternion.identity, _placeholders[i].transform.parent).GetComponent<Mole>());
 			Destroy(_placeholders[i].gameObject);
 		}
