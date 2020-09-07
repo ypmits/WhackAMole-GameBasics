@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add4587467f9bd54e85ec057103cddd7, type: 3}
+  m_Name: MoleData Level Easy
+  m_EditorClassIdentifier: 
+  whackSounds:
+  - {fileID: 8300000, guid: beb818bb776c70d45827e5e7e67bab3f, type: 3}
+  - {fileID: 8300000, guid: e545df542906f994c98807e1af5b6a9d, type: 3}
+  - {fileID: 8300000, guid: 6fc1fe1fe861c8043b45b069023caa8a, type: 3}
+  - {fileID: 8300000, guid: 2d2bf97ebf6af70418fcee66fbe31488, type: 3}
