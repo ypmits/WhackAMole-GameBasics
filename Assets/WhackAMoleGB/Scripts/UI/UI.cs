@@ -3,12 +3,17 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using System.Collections.Generic;
+using System.Collections;
+using UnityEngine.Events;
 
 public class UI : MonoBehaviour
 {
 #pragma warning disable 649
 	[Header("General-assetGroup")]
 	[SerializeField] private Image _backgroundImage;
+	[SerializeField] private TextMeshProUGUI _explanationText;
+	[SerializeField] private Button _buttonLetsGo;
+	[SerializeField] private Button _buttonPause;
 	[Header("StartScreen-assetGroup")]
 	[SerializeField] private TextMeshProUGUI _titleText;
 	[SerializeField] private Button _buttonEasy;
@@ -31,22 +36,39 @@ public class UI : MonoBehaviour
 #pragma warning restore 649
 
 	// Publics:
-	public UIBackground background { get; private set; }
+	public UIExplanation explanation { get; private set; }
+	public UIImage background { get; private set; }
+	public UIButton pauseButton { get; private set; }
 	public UIStartScreen startScreen { get; private set; }
 	public UIPauseScreen pauseScreen { get; private set; }
 	public UIScoresScreen scoresScreen { get; private set; }
 	public UIGameOverScreen gameOver { get; private set; }
+	public LifeCounterObjects lifeCounterObjects => _lifeCounterObjects;
 	public CountDown countdown => _countdown;
 	public VisualTimer timer => _timer;
+
+	private IEnumerator _coroutine;
 
 
 	private void Awake()
 	{
-		background = new UIBackground(_backgroundImage);
-		startScreen = new UIStartScreen(_titleText, _buttonEasy, _buttonMedium, _buttonHard);
-		pauseScreen = new UIPauseScreen(_pauseText, _continueButton, _restartButton, _goHomeButton);
+		// Reusable components:
+		UIButton buttonRestart = new UIButton(_restartButton, () => { StateManager.gameEvent.Invoke(GameEvent.RestartGame); });
+		UIButton buttonEasy = new UIButton(_buttonEasy, () => { Model.levelData = GameController.refs.prefabs.levelEasy; StateManager.gameEvent.Invoke(GameEvent.ShowExplanation); });
+		UIButton buttonMedium = new UIButton(_buttonMedium, () => { Model.levelData = GameController.refs.prefabs.levelMedium; StateManager.gameEvent.Invoke(GameEvent.ShowExplanation); });
+		UIButton buttonHard = new UIButton(_buttonHard, () => { Model.levelData = GameController.refs.prefabs.levelHard; StateManager.gameEvent.Invoke(GameEvent.ShowExplanation); });
+		UIButton buttonLetsGo = new UIButton(_buttonLetsGo, () => { StateManager.gameEvent.Invoke(GameEvent.StartCountDown); });
+		UIButton buttonGoHome = new UIButton(_goHomeButton, () => { StateManager.gameEvent.Invoke(GameEvent.GoHome); });
+		UIButton buttonContinue = new UIButton(_continueButton, () => { StateManager.gameEvent.Invoke(GameEvent.Continue); });
+		pauseButton = new UIButton(_buttonPause, () => { StateManager.gameEvent.Invoke(GameEvent.Pause); });
+
+		background = new UIImage(_backgroundImage);
+		explanation = new UIExplanation(new UIText(_explanationText), buttonLetsGo);
+		startScreen = new UIStartScreen(new UIText(_titleText), buttonEasy, buttonMedium, buttonHard);
+		pauseScreen = new UIPauseScreen(new UIText(_pauseText), buttonContinue, buttonRestart, buttonGoHome);
 		scoresScreen = new UIScoresScreen(_scoreText, _hiscoreText, _lifeCounterObjects);
-		gameOver = new UIGameOverScreen(_gameOverText, _restartButton, _goHomeButton);
+		gameOver = new UIGameOverScreen(new UIText(_gameOverText), buttonRestart, buttonGoHome);
+
 		timer.completeAction = () => StateManager.gameEvent.Invoke(GameEvent.GameOver);
 	}
 
@@ -57,30 +79,71 @@ public class UI : MonoBehaviour
 			switch (e)
 			{
 				case GameEvent.GoHome:
-					Debug.Log("UI Home");
+					pauseButton.Hide();
+					scoresScreen.Hide();
 					startScreen.Show();
 					break;
 
+				case GameEvent.ShowExplanation:
+					if (_coroutine != null) StopCoroutine(_coroutine);
+					_coroutine = ShowExplanation(.5f);
+					StartCoroutine(_coroutine);
+					break;
+
 				case GameEvent.StartCountDown:
-					startScreen.Hide();
-					scoresScreen.UpdateScore();
-					countdown.StartCountDown(() =>
-					{
-						StateManager.gameEvent.Invoke(GameEvent.StartGame);
-					});
+					if (_coroutine != null) StopCoroutine(_coroutine);
+					_coroutine = ShowCountdown(.5f);
+					timer.Reset();
+					StartCoroutine(_coroutine);
 					break;
 
 				case GameEvent.StartGame:
-					Debug.Log("UI Startgame");
+					pauseButton.Show();
 					scoresScreen.Show();
-					timer.Setup(20f, true, true);
+					if (Model.levelData.timeBased) timer.Setup(20f, true, true);
 					break;
 
 				case GameEvent.GameOver:
+					if (_coroutine != null) StopCoroutine(_coroutine);
 					gameOver.Show();
+					pauseButton.Hide();
+					_lifeCounterObjects.Hide();
+					if (Model.levelData.timeBased) timer.Pause();
+					break;
+
+				case GameEvent.Pause:
+					pauseScreen.Show();
+					if (Model.levelData.timeBased) timer.Pause();
+					break;
+
+				case GameEvent.Continue:
+					pauseScreen.Hide();
+					if (Model.levelData.timeBased) timer.StartTimer();
 					break;
 			}
 		});
+	}
+
+	private IEnumerator ShowExplanation(float delay)
+	{
+		explanation.text = Model.levelData;
+		startScreen.Hide();
+		yield return new WaitForSeconds(delay);
+		explanation.Show();
+		yield return null;
+	}
+
+	private IEnumerator ShowCountdown(float delay)
+	{
+		explanation.Hide();
+		startScreen.Hide();
+		scoresScreen.UpdateScore();
+		yield return new WaitForSeconds(delay);
+		countdown.StartCountDown(() =>
+		{
+			StateManager.gameEvent.Invoke(GameEvent.StartGame);
+		});
+		yield return null;
 	}
 }
 
@@ -92,33 +155,206 @@ public class UI : MonoBehaviour
 
 /**
 <summary>
-General
+General purpose Image which has all tweening-functionality inside
 </summary>
 */
-public class UIBackground
-{
-	private Image _backgroundImage;
+// TODO: Implement the UITweenType
+public enum UITweenType { Fade, Move, Scale }
+public interface IUIElement { void Show(); void Hide(); }
 
-	public UIBackground(Image backgroundImage)
+public class UIImage : IUIElement
+{
+	private Image _img;
+
+	public bool IsShowing;
+
+	public UIImage(Image img)
 	{
-		_backgroundImage = backgroundImage;
+		_img = img;
+		_img.color = new Color(_img.color.r, _img.color.g, _img.color.b, 0f);
+		_img.gameObject.SetActive(false);
 	}
 
 	public void Show()
 	{
-		float duration = .3f;
-		Ease ease = Ease.OutExpo;
+		if (IsShowing) return;
+		IsShowing = true;
 
-		_backgroundImage.gameObject.SetActive(true);
-		_backgroundImage.DOFade(.8f, duration).SetEase(ease);
+		_img.gameObject.SetActive(true);
+		_img.DOFade(.8f, .3f)
+			.SetEase(Ease.OutExpo)
+			.SetAutoKill();
 	}
 
 	public void Hide()
 	{
-		float duration = .25f;
-		Ease ease = Ease.InExpo;
+		if (!IsShowing) return;
+		IsShowing = false;
 
-		_backgroundImage.DOFade(0f, duration).SetEase(ease).OnComplete(() => _backgroundImage.gameObject.SetActive(false));
+		_img.DOFade(0f, .25f)
+			.SetEase(Ease.InExpo)
+			.SetAutoKill()
+			.OnComplete(() => _img.gameObject.SetActive(false));
+	}
+}
+
+/**
+<summary>
+General purpose TMPro-text which has all tweening-functionality inside
+</summary>
+*/
+public class UIText : IUIElement
+{
+	private TextMeshProUGUI _text;
+
+	public bool IsShowing;
+	public LevelData text
+	{
+		set
+		{
+			value.explanation = value.explanation.Replace("{{startSpeed}}", value.startSpeed.ToString());
+			value.explanation = value.explanation.Replace("{{totalTime}}", value.totalTime.ToString());
+			_text.text = value.explanation;
+		}
+	}
+
+	public UIText(TextMeshProUGUI text)
+	{
+		_text = text;
+		_text.color = new Color(_text.color.r, _text.color.g, _text.color.b, 0f);
+		_text.gameObject.SetActive(false);
+	}
+
+	public void Show()
+	{
+		if (IsShowing) return;
+		IsShowing = true;
+
+		_text.gameObject.SetActive(true);
+		_text.DOFade(1f, .3f)
+			.SetEase(Ease.OutExpo)
+			.SetAutoKill();
+	}
+
+	public void Hide()
+	{
+		if (!IsShowing) return;
+		IsShowing = false;
+
+		_text.DOFade(0f, .25f)
+			.SetEase(Ease.InExpo)
+			.OnComplete(() => _text.gameObject.SetActive(false))
+			.SetAutoKill();
+	}
+}
+
+/**
+<summary>
+General purpose UIButton which has all tweening-functionality inside
+Use this to quickly build a UIButton with predefined base-functionality
+- clickAction: when the user pushes the button
+</summary>
+*/
+public class UIButton : IUIElement
+{
+	private Button _button;
+	private UnityAction _clickAction;
+	private RectTransform _rt => _button.transform as RectTransform;
+	private float _smallScale = .2f;
+
+	public bool IsShowing;
+
+	public UIButton(Button button, UnityAction clickAction = null)
+	{
+		_button = button;
+		_clickAction = clickAction;
+		_rt.localScale = new Vector3(_smallScale, _smallScale, 1f);
+		_button.onClick.AddListener(() =>
+		{
+			if (!IsShowing || clickAction == null) return;
+			clickAction.Invoke();
+		});
+		_button.gameObject.SetActive(false);
+	}
+
+	public void Show()
+	{
+		if (IsShowing) return;
+		IsShowing = true;
+
+		float duration = .3f;
+		float delay = .1f;
+		Ease ease = Ease.OutExpo;
+		_button.gameObject.SetActive(true);
+		_rt.DOScaleX(1f, duration)
+			.SetEase(ease)
+			.SetAutoKill();
+		_rt.DOScaleY(1, duration)
+			.SetEase(ease)
+			.SetDelay(delay)
+			.SetAutoKill();
+	}
+
+	public void Hide()
+	{
+		if (!IsShowing) return;
+		IsShowing = false;
+
+		float duration = .25f;
+		Ease ease = Ease.InBack;
+
+		_rt.DOScale(_smallScale, duration)
+			.SetEase(ease)
+			.OnComplete(() => { _button.gameObject.SetActive(false); })
+			.SetAutoKill();
+	}
+
+	public void SetClickAction(UnityAction clickAction)
+	{
+		_clickAction = clickAction;
+	}
+}
+
+/**
+<summary>
+</summary>
+*/
+public class UIExplanation
+{
+	private UIText _text;
+	private UIButton _letsGoButton;
+	private List<IUIElement> _elements;
+
+	public bool IsShowing = false;
+	public LevelData text
+	{
+		set
+		{
+			_text.text = value;
+		}
+	}
+
+	public UIExplanation(UIText text, UIButton letsGoButton)
+	{
+		_text = text;
+		_letsGoButton = letsGoButton;
+		_elements = new List<IUIElement>() { GameController.refs.ui.background, _text, _letsGoButton };
+	}
+
+	public void Show()
+	{
+		if (IsShowing) return;
+		IsShowing = true;
+
+		_elements.ForEach(el => el.Show());
+	}
+
+	public void Hide()
+	{
+		if (!IsShowing) return;
+		IsShowing = false;
+
+		_elements.ForEach(el => el.Hide());
 	}
 }
 
@@ -128,97 +364,46 @@ public class UIBackground
 */
 public class UIStartScreen
 {
-	private TextMeshProUGUI _titleText;
-	private List<Button> _buttons = new List<Button>();
-	private List<LevelData> _levelDatas = new List<LevelData>();
-	private List<CanvasGroup> _canvasGroups = new List<CanvasGroup>();
+	private UIText _titleText;
+	private List<IUIElement> _elements;
 
-	private bool isShowing = false;
+	public bool IsShowing = false;
 
-	public UIStartScreen(TextMeshProUGUI titleText, Button buttonEasy, Button buttonMedium, Button buttonHard)
+	public UIStartScreen(UIText titleText, UIButton buttonEasy, UIButton buttonMedium, UIButton buttonHard)
 	{
 		_titleText = titleText;
-		_buttons.AddRange( new Button[3]{buttonEasy, buttonMedium, buttonHard });
-		_levelDatas.AddRange( new LevelData[3]{GameController.refs.prefabs.levelEasy, GameController.refs.prefabs.levelMedium, GameController.refs.prefabs.levelHard });
-		for (int i = 0; i < _buttons.Count; i++) {
-			LevelData ld = _levelDatas[i];
-			_buttons[i].onClick.AddListener(()=>{
-				if(!isShowing) return;
-				Model.levelData = ld;
-				StateManager.gameEvent.Invoke(GameEvent.StartCountDown);
-			});
-			CanvasGroup cg = _buttons[i].GetComponent<CanvasGroup>();
-			cg.alpha = 0f;
-			_canvasGroups.Add(cg);
-			_buttons[i].gameObject.SetActive(false);
-		}
-		_titleText.alpha = 0f;
-		_titleText.gameObject.SetActive(false);
+		_elements = new List<IUIElement>() { GameController.refs.ui.background, titleText, buttonEasy, buttonMedium, buttonHard };
 	}
 
 	public void Show()
 	{
-		if(isShowing) return;
-		isShowing = true;
+		if (IsShowing) return;
+		IsShowing = true;
 
-		float duration = .3f;
-		Ease ease = Ease.OutExpo;
-
-		GameController.refs.ui.background.Show();
-
-		int n = 0;
-		_canvasGroups.ForEach(cg => { cg.DOFade(1f, duration).SetEase(ease).SetDelay(n++*.1f).OnStart(()=>{cg.gameObject.SetActive(true);}); });
-		_titleText.DOFade(1f, duration).SetEase(ease).OnStart(()=>{_titleText.gameObject.SetActive(true);});
+		_elements.ForEach(el => el.Show());
 	}
 
 	public void Hide()
 	{
-		if(!isShowing) return;
-		isShowing = false;
+		if (!IsShowing) return;
+		IsShowing = false;
 
-		float duration = .25f;
-		Ease ease = Ease.InExpo;
-
-		GameController.refs.ui.background.Hide();
-		_canvasGroups.ForEach(cg => {
-			cg.DOFade(0f, duration).SetEase(ease).OnComplete(() => cg.gameObject.SetActive(false));
-		});
-		_titleText.DOFade(0f, duration).SetEase(ease).OnComplete(() => _titleText.gameObject.SetActive(false));
+		_elements.ForEach(el => el.Hide());
 	}
 }
 
 /**
 <summary>
-When the user pauses the game this handles all the items of the pause-screen
+When the game pauses the game this handles all the items of the pause-screen
 </summary>
 */
 public class UIPauseScreen
 {
-	private References _refs;
-	private TextMeshProUGUI _pauseText;
-	private Button _continueButton;
-	private CanvasGroup _continueButtonCG;
-	private Button _restartButton;
-	private CanvasGroup _restartButtonCG;
-	private Button _goHomeButton;
-	private CanvasGroup _goHomeButtonCG;
+	private List<IUIElement> _elements;
 
-	public UIPauseScreen(TextMeshProUGUI pauseText, Button continueButton, Button restartButton, Button goHomeButton)
+	public UIPauseScreen(UIText pauseText, UIButton continueButton, UIButton restartButton, UIButton goHomeButton)
 	{
-		_refs = GameController.refs;
-		_pauseText = pauseText;
-		_continueButton = continueButton;
-		_continueButtonCG = continueButton.GetComponent<CanvasGroup>();
-		_restartButton = restartButton;
-		_restartButtonCG = _restartButton.GetComponent<CanvasGroup>();
-		_goHomeButton = goHomeButton;
-		_goHomeButtonCG = _goHomeButton.GetComponent<CanvasGroup>();
-
-		_pauseText.alpha = 0f;
-		_pauseText.gameObject.SetActive(false);
-		_continueButton.gameObject.SetActive(false);
-		_restartButton.gameObject.SetActive(false);
-		_goHomeButton.gameObject.SetActive(false);
+		_elements = new List<IUIElement>() { GameController.refs.ui.background, pauseText, continueButton, restartButton, goHomeButton };
 	}
 
 	/**
@@ -228,18 +413,7 @@ public class UIPauseScreen
 	*/
 	public void Show()
 	{
-		float duration = .3f;
-		Ease ease = Ease.OutExpo;
-
-		_refs.ui.background.Show();
-		_pauseText.gameObject.SetActive(true);
-		_pauseText.DOFade(1f, duration).SetEase(ease);
-		_continueButton.gameObject.SetActive(true);
-		_continueButtonCG.DOFade(1f, duration).SetEase(ease);
-		_restartButton.gameObject.SetActive(true);
-		_restartButtonCG.DOFade(1f, duration).SetEase(ease);
-		_goHomeButton.gameObject.SetActive(true);
-		_goHomeButtonCG.DOFade(1f, duration).SetEase(ease);
+		_elements.ForEach(el => el.Show());
 	}
 
 	/**
@@ -248,14 +422,7 @@ public class UIPauseScreen
 	*/
 	public void Hide()
 	{
-		float duration = .25f;
-		Ease ease = Ease.InExpo;
-
-		_refs.ui.background.Hide();
-		_pauseText.DOFade(0f, duration).SetEase(ease).OnComplete(() => _pauseText.gameObject.SetActive(false));
-		_continueButtonCG.DOFade(0f, duration).SetEase(ease).OnComplete(() => _continueButton.gameObject.SetActive(false));
-		_restartButtonCG.DOFade(0f, duration).SetEase(ease).OnComplete(() => _restartButton.gameObject.SetActive(false));
-		_goHomeButtonCG.DOFade(0f, duration).SetEase(ease).OnComplete(() => _goHomeButton.gameObject.SetActive(false));
+		_elements.ForEach(el => el.Hide());
 	}
 }
 
@@ -334,32 +501,20 @@ public class UIScoresScreen
 */
 public class UIGameOverScreen
 {
-	private TextMeshProUGUI _gameOverText;
+	private List<IUIElement> _elements;
 
-	public UIGameOverScreen(TextMeshProUGUI gameOverText, Button restartButton, Button goHomeButton)
+	public UIGameOverScreen(UIText gameOverText, UIButton restartButton, UIButton goHomeButton)
 	{
-		_gameOverText = gameOverText;
-		_gameOverText.alpha = 0f;
-		_gameOverText.gameObject.SetActive(false);
+		_elements = new List<IUIElement>() { GameController.refs.ui.background, gameOverText, restartButton, goHomeButton };
 	}
 
 	public void Show()
 	{
-		float duration = .3f;
-		Ease ease = Ease.OutExpo;
-
-		GameController.refs.ui.background.Show();
-		_gameOverText.gameObject.SetActive(true);
-		_gameOverText.DOFade(1f, duration).SetEase(ease);
+		_elements.ForEach(el => el.Show());
 	}
 
 	public void Hide()
 	{
-		float duration = .25f;
-		Ease ease = Ease.InExpo;
-
-		GameController.refs.ui.background.Hide();
-		GameController.refs.ui.timer.Hide();
-		_gameOverText.DOFade(0f, duration).SetEase(ease).OnComplete(() => _gameOverText.gameObject.SetActive(false));
+		_elements.ForEach(el => el.Hide());
 	}
 }

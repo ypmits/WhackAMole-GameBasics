@@ -20,13 +20,15 @@ public class Mole : MonoBehaviour
 	[SerializeField, ColorUsage(true, true)] private Color32 _fromColor;
 #pragma warning restore 649
 
-	public bool isShowing { get; private set; }
+	public bool IsVisible { get; private set; }
+	
 	private float _targetYPos = 0f;
 	private Vector3 _originalPos;
 	private Renderer _renderer;
 	private Material _material;
 	private Tweener _tweenCoreColor;
 	private Tweener _tweenCoreLight;
+	private IEnumerator _coroutine;
 
 	private void Start()
 	{
@@ -47,16 +49,17 @@ public class Mole : MonoBehaviour
 	private void Update()
 	{
 		transform.position = Vector3.Lerp(transform.position, new Vector3(_originalPos.x, _targetYPos, _originalPos.z), Time.deltaTime * speed);
-		float diff = Mathf.Abs((isShowing ? _showYPos : _hideYPos) - transform.position.y);
-		if (!isShowing && diff < .001f) _renderer.enabled = false;
+		float diff = Mathf.Abs((IsVisible ? _showYPos : _hideYPos) - transform.position.y);
+		if (!IsVisible && diff < .001f) _renderer.enabled = false;
 	}
 
 	private void OnMouseDown()
 	{
-		if (!isShowing || StateManager.state != GameState.InGameScreen) return;
+		if (!IsVisible || StateManager.state != GameState.InGameScreen) return;
+
+		if(_coroutine != null) StopCoroutine(_coroutine);
 
 		AudioManager.PlaySound(_moleData.GetWhackSound());
-		// AudioManager.PlaySoundAtPosition(_moleData.GetWhackSound(), transform.position);
 		StateManager.gameEvent.Invoke(GameEvent.Whack);
 
 		if (_clickParticles) _clickParticles.Play();
@@ -64,28 +67,42 @@ public class Mole : MonoBehaviour
 		_tweenCoreColor.Play();
 		_tweenCoreLight.Play();
 		
-		StartCoroutine(WaitAndHide(.2f));
+		_coroutine = WaitAndHide(.2f);
+		StartCoroutine(_coroutine);
 	}
 
-	internal void Show()
+	/**
+	<summary>
+	</summary>
+	*/
+	public void Show()
 	{
-		if (isShowing) return;
+		if (IsVisible) return;
 		_renderer.enabled = true;
-		isShowing = true;
+		IsVisible = true;
 		_targetYPos = _showYPos;
+
+		if(_coroutine != null) StopCoroutine(_coroutine);
+		_coroutine = WaitAndHide(_moleData.aliveTime, true);
+		StartCoroutine(_coroutine);
 	}
 
-	private IEnumerator WaitAndHide(float delay)
+	private IEnumerator WaitAndHide(float delay, bool takeLife = false)
 	{
 		yield return new WaitForSeconds(delay);
 		Hide();
+		if(takeLife) GameController.refs.gameController.TakeLife();
 		yield return null;
 	}
 
-	internal void Hide()
+	/**
+	<summary>
+	</summary>
+	*/
+	public void Hide()
 	{
-		if (!isShowing) return;
-		isShowing = false;
+		if (!IsVisible) return;
+		IsVisible = false;
 		_targetYPos = _hideYPos;
 	}
 }

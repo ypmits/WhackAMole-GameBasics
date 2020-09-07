@@ -44,12 +44,23 @@ public class VisualTimer : MonoBehaviour {
 		if(!isPaused) return;
 		isPaused = false;
 	}
+	/**
+	Pauses the timer.
+	The bar will stay the where it ended
+	*/
 	public void Pause()
 	{
 		if(isPaused) return;
 		isPaused = true;
 	}
-
+	/**
+	Stops the timer
+	The bar will be reset (filled to the fullest)
+	*/
+	public void Stop()
+	{
+		Reset();
+	}
 	public void Reset()
 	{
 		isPaused = true;

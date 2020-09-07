@@ -17,3 +17,4 @@ MonoBehaviour:
   - {fileID: 8300000, guid: e545df542906f994c98807e1af5b6a9d, type: 3}
   - {fileID: 8300000, guid: 6fc1fe1fe861c8043b45b069023caa8a, type: 3}
   - {fileID: 8300000, guid: 2d2bf97ebf6af70418fcee66fbe31488, type: 3}
+  aliveTime: 1

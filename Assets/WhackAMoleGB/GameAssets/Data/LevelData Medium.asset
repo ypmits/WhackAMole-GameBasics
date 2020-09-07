@@ -12,10 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be1d174f85cbc6b42b2831bd321c89be, type: 3}
   m_Name: LevelData Medium
   m_EditorClassIdentifier: 
-  difficulty: 0
-  startSpeed: 2
-  totalTime: 10
-  timeBased: 0
+  difficulty: 1
+  startSpeed: 3
+  timeBased: 1
+  speedMultiplier: 0.89
+  totalTime: 20
+  explanation: This is the medium mode. This level lasts 20 seconds.
   moles:
   - {fileID: 7802383442674905744, guid: 4bfed2b1b32212047b534c1d463d3f75, type: 3}
   - {fileID: 7802383442674905744, guid: 3db9310693910c94d92ed27208a09f26, type: 3}

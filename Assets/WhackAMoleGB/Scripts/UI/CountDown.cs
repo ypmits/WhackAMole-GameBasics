@@ -8,6 +8,9 @@ using System.Collections.Generic;
 
 /**
 <summary>
+Can count down and then call a function.
+You can add seperate sounds for the counting and the finish.
+You can set the delay
 </summary>
 */
 public class CountDown : MonoBehaviour
@@ -43,36 +46,36 @@ public class CountDown : MonoBehaviour
 	<summary>
 	</summary>
 	*/
-	public void StartCountDown(UnityAction action = null, float delay = .5f)
+	public void StartCountDown(UnityAction action = null, float countDelay = .5f)
 	{
 		_currentImageIndex = 0;
 		_current = 3;
 		_action = action;
-		_delay = delay;
+		_delay = countDelay;
 		isCountingDown = true;
 
 		if(_currentTransforms != null && _currentTransforms.Count > 0) _currentTransforms.ForEach(transform=>transform.DOKill());
-		StartCoroutine(Count(delay));
+		StartCoroutine(Count());
 	}
 
-	private IEnumerator Count(float delay)
+	private IEnumerator Count()
 	{
-		_currentTransforms = Fade(_images[_currentImageIndex], delay, _currentImageIndex == 0 ? null : _images[_currentImageIndex-1]);
+		_currentTransforms = Fade(_images[_currentImageIndex], _delay, _currentImageIndex == 0 ? null : _images[_currentImageIndex-1]);
 		_currentImageIndex++;
 		AudioManager.PlaySound(_current == 0 ? _beepFinished : _beepCountDown);
 		if (_current == 0)
 		{
 			_current = 3;
 			isCountingDown = false;
-			yield return new WaitForSeconds(delay);
-			_currentTransforms = Fade(null, delay, _images[_currentImageIndex-1]);
+			yield return new WaitForSeconds(_delay);
+			_currentTransforms = Fade(null, _delay, _images[_currentImageIndex-1]);
 			_action?.Invoke();
 		}
 		else
 		{
 			_current--;
-			yield return new WaitForSeconds(delay);
-			StartCoroutine(Count(delay));
+			yield return new WaitForSeconds(_delay);
+			StartCoroutine(Count());
 		}
 		yield return null;
 	}

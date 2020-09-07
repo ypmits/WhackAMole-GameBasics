@@ -9,16 +9,18 @@ using UnityEngine.UI;
 */
 public class LifeCounter : MonoBehaviour
 {
+#pragma warning disable 649
 	[SerializeField] private Image _image;
 	[SerializeField] private Image _errorImage;
-	private bool isShowing;
-	private RectTransform rt => transform as RectTransform;
 	[SerializeField] private float _showYPos = 30f;
 	[SerializeField] private float _hideYPos = -250f;
+#pragma warning restore 649
+	private bool isShowing;
+	private RectTransform rt => transform as RectTransform;
 
 	public bool isActive = false;
 
-	void Awake()
+	void Start()
 	{
 		Reset();
 	}
@@ -31,7 +33,7 @@ public class LifeCounter : MonoBehaviour
 	{
 		if(isShowing) return;
 		isShowing = true;
-		_errorImage.gameObject.SetActive(true);
+		
 		gameObject.SetActive(true);
 
 		// DOTween-animations:
@@ -56,16 +58,17 @@ public class LifeCounter : MonoBehaviour
 	public void Activate()
 	{
 		isActive = true;
+		Debug.Log("LiefCounter Activate");
 
 		// DOTween-animations:
-		_errorImage.DOFade(1f, .35f).SetEase(Ease.OutExpo).From(new Color(1f,1f,1f,0f), false).OnStart(()=>{_errorImage.gameObject.SetActive(true);}).SetAutoKill();
+		_errorImage.gameObject.SetActive(true);
+		_errorImage.DOFade(1f, .35f).SetEase(Ease.OutExpo).SetAutoKill();
 	}
 
 	public void Reset()
 	{
 		isShowing = isActive = false;
 		_image.color = new Color(1f,1f,1f,0f);
-		_errorImage.color = new Color(1f,1f,1f,0f);
 		rt.anchoredPosition = new Vector3(rt.anchoredPosition.x, _hideYPos);
 		_errorImage.gameObject.SetActive(false);
 		gameObject.SetActive(false);

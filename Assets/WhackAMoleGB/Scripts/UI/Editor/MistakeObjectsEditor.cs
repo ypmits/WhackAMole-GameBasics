@@ -12,7 +12,7 @@ public class MistakeObjectsEditor : Editor {
 			if(GUILayout.Button("Hide")) t.Hide();
 		GUILayout.EndHorizontal();
 		GUILayout.BeginHorizontal(EditorStyles.helpBox);
-			if(GUILayout.Button("Next")) { t.ActivateNext(); }
+			if(GUILayout.Button("Next")) { t.TakeLife(); }
 			if(GUILayout.Button("Reset")) t.Reset();
 		GUILayout.EndHorizontal();
 		GUILayout.EndVertical();

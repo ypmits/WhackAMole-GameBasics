@@ -1,3 +1,5 @@
+
+using UnityEngine;
 /**
 <summary>
 </summary>
@@ -10,7 +12,7 @@ public class ScoreManager
 	public static void Reset()
 	{
 		score = 0;
-		CheckScores();
+		hiscore = Model.GetHiscore();
 	}
 
 	public static void AddScore(int num)
@@ -18,8 +20,13 @@ public class ScoreManager
 		score += num;
 	}
 
-	public static void CheckScores()
+	public static bool CheckHIScores()
 	{
-		if(score > hiscore) hiscore = score;
+		if(score > hiscore) {
+			hiscore = score;
+			Model.SaveHiscore();
+			return true;
+		}
+		return false;
 	}
 }

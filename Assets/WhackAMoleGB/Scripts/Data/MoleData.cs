@@ -3,7 +3,8 @@ using UnityEngine;
 
 [CreateAssetMenu(fileName = "MoleData", menuName = "WhackAMoleGamebasics/MoleData", order = 0)]
 public class MoleData : ScriptableObject {
-	public List<AudioClip> whackSounds;
+	[Tooltip("The tap/click-sounds. A random sound will be picked by the game")] public List<AudioClip> whackSounds;
+	[Tooltip("The total time every mole stays visible")] public float aliveTime = 10f;
 
 	public AudioClip GetWhackSound()
 	{

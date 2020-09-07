@@ -13,9 +13,12 @@ MonoBehaviour:
   m_Name: LevelData Easy
   m_EditorClassIdentifier: 
   difficulty: 0
-  startSpeed: 3
-  totalTime: 10
-  timeBased: 0
+  startSpeed: 5
+  timeBased: 1
+  speedMultiplier: 0.933
+  totalTime: 30
+  explanation: This is the easiest mode. You'll have 30 seconds and the moles will
+    popup every 3 seconds.
   moles:
   - {fileID: 7802383442674905744, guid: a021abffa25864dc28167cfcd10cfc77, type: 3}
   - {fileID: 7802383442674905744, guid: fba93935f4312334faa6f791b19536c8, type: 3}

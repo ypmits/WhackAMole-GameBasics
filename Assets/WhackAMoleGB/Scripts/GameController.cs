@@ -26,26 +26,31 @@ public class GameController : MonoBehaviour
 		// Setup the references:
 		GameController.refs = new References(this, _ui, _gameEngine, _prefabs);
 
+		// Reset the scores:
+		ScoreManager.Reset();
+
 		// Initialize the AudioManager. Important! set the 'sound' to 'true' since we're not using any preferences in this app:
 		AudioManager.sound = true;
 		AudioManager.AttachAudioSources(gameObject);
 
 		// Setup the GameEvent-listener:
+		// From here all the states are set:
 		StateManager.gameEvent.AddListener((GameEvent e) =>
 		{
 			switch (e)
 			{
 				case GameEvent.GoHome:
-					StateManager.SetState(GameState.HomeScreen);
+					StateManager.state =GameState.HomeScreen;
 					break;
 
 				case GameEvent.StartGame:
-					StateManager.SetState( GameState.InGameScreen );
+					StateManager.isAlive = true;
+					StateManager.state = GameState.InGameScreen;
 					ScoreManager.Reset();
 					break;
 
 				case GameEvent.RestartGame:
-					StateManager.SetState( GameState.InGameScreen );
+					StateManager.state = GameState.InGameScreen;
 					ScoreManager.Reset();
 					break;
 				
@@ -56,7 +61,9 @@ public class GameController : MonoBehaviour
 					break;
 				
 				case GameEvent.GameOver:
-					StateManager.SetState( GameState.GameOverScreen );
+					StateManager.isAlive = false;
+					StateManager.state = GameState.GameOverScreen;
+					ScoreManager.CheckHIScores();
 					break;
 
 			}
@@ -68,5 +75,10 @@ public class GameController : MonoBehaviour
 		yield return new WaitForEndOfFrame();
 		StateManager.gameEvent.Invoke(GameEvent.GoHome);
 		yield return null;
+	}
+
+	public void TakeLife()
+	{
+		GameController.refs.ui.lifeCounterObjects.TakeLife();
 	}
 }

@@ -5,26 +5,30 @@ using System.Linq;
 
 public class LifeCounterObjects : MonoBehaviour
 {
+#pragma warning disable 649
 	[SerializeField] private List<LifeCounter> _objects;
-	private bool isShowing;
+#pragma warning restore 649
+	private bool IsShowing;
 
 
     public void Show()
     {
-		if(isShowing) return;
-		isShowing = true;
+		if(IsShowing) return;
+		IsShowing = true;
+		
 		int n = 0;
         _objects.ForEach(obj=>obj.Show(n++));
     }
 
     public void Hide()
     {
-		if(!isShowing) return;
-		isShowing = false;
+		if(!IsShowing) return;
+		IsShowing = false;
+
         _objects.ForEach(obj=>obj.Hide());
     }
 
-	public void ActivateNext()
+	public void TakeLife()
 	{
 		bool n = false;
 		_objects.ForEach(obj=>{
@@ -42,7 +46,7 @@ public class LifeCounterObjects : MonoBehaviour
 
 	public void Reset()
 	{
-		isShowing = false;
+		IsShowing = false;
 		_objects.ForEach(obj=>obj.Reset());
 	}
 }
