@@ -6,4 +6,5 @@ public class Prefabs : ScriptableObject {
 	public LevelData levelEasy;
 	public LevelData levelMedium;
 	public LevelData levelHard;
+	public AudioClip hiScoreSound;
 }

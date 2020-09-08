@@ -13,12 +13,14 @@ MonoBehaviour:
   m_Name: LevelData Easy
   m_EditorClassIdentifier: 
   difficulty: 0
-  startSpeed: 5
+  spawnSpeed: 3
   timeBased: 1
-  speedMultiplier: 0.933
+  moleSpawnDecrement: 0.933
   totalTime: 30
-  explanation: This is the easiest mode. You'll have 30 seconds and the moles will
-    popup every 3 seconds.
+  timeUsedWhenClicked: 1
+  explanation: This is the easiest mode. You'll have {{totalTime}} seconds and the
+    moles will popup every {{startSpeed}} seconds. Getting a hiscore on Easy-mode
+    is not gonna hold because of the time-restriction.
   moles:
   - {fileID: 7802383442674905744, guid: a021abffa25864dc28167cfcd10cfc77, type: 3}
   - {fileID: 7802383442674905744, guid: fba93935f4312334faa6f791b19536c8, type: 3}

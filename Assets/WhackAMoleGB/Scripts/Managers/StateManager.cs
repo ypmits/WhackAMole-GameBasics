@@ -11,4 +11,5 @@ public class StateManager
 	public static ChangeGameState gameState = new ChangeGameState();
 	public static GameState state;
 	public static bool isAlive = false;
+	public static bool isPaused = true;
 }

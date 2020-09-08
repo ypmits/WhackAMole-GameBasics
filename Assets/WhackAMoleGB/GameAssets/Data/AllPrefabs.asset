@@ -15,3 +15,4 @@ MonoBehaviour:
   levelEasy: {fileID: 11400000, guid: 690e14ceaa51549b794e04dbdc3389e2, type: 2}
   levelMedium: {fileID: 11400000, guid: 05746e4bbf3d74fcc889b0562ff93043, type: 2}
   levelHard: {fileID: 11400000, guid: 0f9fb62e490a1431cab534d1017f2437, type: 2}
+  hiScoreSound: {fileID: 8300000, guid: 6afb17162fee0024b9f6bbdb875aad0b, type: 3}

@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: LevelData Hard
   m_EditorClassIdentifier: 
   difficulty: 2
-  startSpeed: 1
+  spawnSpeed: 3
   timeBased: 0
-  speedMultiplier: 0.817
+  moleSpawnDecrement: 0.817
   totalTime: 10
+  timeUsedWhenClicked: 0.2
   explanation: This is the hard mode. Moles will popup every {{startSpeed}} second.
     You'll have no time limit here.
   moles:

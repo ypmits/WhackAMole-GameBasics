@@ -54,16 +54,9 @@ public class GameController : MonoBehaviour
 					ScoreManager.Reset();
 					break;
 				
-				case GameEvent.Whack:
-					Debug.Log("Whack!");
-					ScoreManager.AddScore(1);
-					_ui.scoresScreen.UpdateScore();
-					break;
-				
 				case GameEvent.GameOver:
 					StateManager.isAlive = false;
 					StateManager.state = GameState.GameOverScreen;
-					ScoreManager.CheckHIScores();
 					break;
 
 			}

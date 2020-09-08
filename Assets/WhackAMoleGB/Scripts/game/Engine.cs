@@ -5,72 +5,70 @@ using System.Collections;
 
 public class Engine : MonoBehaviour
 {
-	private GameObject[] _placeholders;
+	private float _spawnSpeed = 1.5f; // How long it takes for a new 'mole' to popup
+	private float _spawnDecrement = 0.1f; // The time that's taken from the spawnDuration with every mole popping up
+	public float gameTimer = 15f; // Total time of game
+	private float spawnTimer = 0f;
+
 	private List<Mole> _moles;
-	private float _startSpeed;
 
-	private bool isPaused = true;
-	private IEnumerator _coroutine;
-
-
-	private void Awake()
-	{
-		_coroutine = PickAMole();
-	}
 
 	private void Start()
 	{
+		ReplacePlaceholderMoles();
 		StateManager.gameEvent.AddListener((GameEvent e) =>
 		{
 			switch (e)
 			{
 				case GameEvent.StartCountDown:
-					InitMoles();
+					gameTimer = Model.levelData.totalTime;
+					Reset();
 					break;
 
 				case GameEvent.StartGame:
-					isPaused = false;
-					_startSpeed = Model.levelData.startSpeed;
-					PickAMole();
-					if (_coroutine != null) StopCoroutine(_coroutine);
-					StartCoroutine(_coroutine);
-					break;
-				
-				case GameEvent.Whack:
-					if (_coroutine != null) StopCoroutine(_coroutine);
-					StartCoroutine(_coroutine);
+				case GameEvent.RestartGame:
+					// First set the _spawnSpeed (how long it takes for the moles to spawn) to the level's startSpeed
+					_spawnSpeed = Model.levelData.spawnSpeed;
+					_spawnDecrement = Model.levelData.moleSpawnDecrement;
+					StateManager.isPaused = false;
 					break;
 
+				case GameEvent.Pause:
 				case GameEvent.GameOver:
-					isPaused = true;
+					StateManager.isPaused = true;
 					break;
+
+				case GameEvent.Continue:
+					StateManager.isPaused = false;
+					break;
+				
 			}
 		});
 	}
 
-	private IEnumerator PickAMole()
+	private void Update()
 	{
-		Debug.Log("Choose a mole to 'Show'");
-		// 1. Get a list of the moles that are not 'visible':
-		List<Mole> activeMoles = _moles.Where(mole => mole.IsVisible == false).ToList();
+		if (StateManager.isPaused) return;
+		if (Model.levelData.timeBased) gameTimer -= Time.deltaTime;
+		if (gameTimer <= 0f) return;
 
-		// 2. Take a random mole from that list:
-		Mole m = activeMoles[Random.Range(0, activeMoles.Count)];
+		spawnTimer -= Time.deltaTime;
+		if (spawnTimer <= 0f)
+		{
+			// Get a random active mole:
+			List<Mole> activeMoles = _moles.Where(mole => mole.IsVisible == false).ToList();
+			activeMoles[Random.Range(0, activeMoles.Count)].Show();
 
-		// 3. Show it
-		m.Show();
-
-		_startSpeed = Mathf.Clamp(_startSpeed - .15f, .25f, float.MaxValue);
-		Debug.Log(_startSpeed);
-		yield return new WaitForSeconds(_startSpeed);
-		StartCoroutine(_coroutine);
-		yield return null;
+			_spawnSpeed -= _spawnDecrement;
+			if (_spawnSpeed < Model.levelData.minimumSpawnDecrement) _spawnSpeed = Model.levelData.minimumSpawnDecrement;
+			spawnTimer = Model.levelData.spawnSpeed;
+		}
 	}
 
-	private void InitMoles()
+	private void ReplacePlaceholderMoles()
 	{
 		if (_moles == null) _moles = new List<Mole>();
-		_placeholders = GameObject.FindGameObjectsWithTag("MolePlaceholder");
+		GameObject[] _placeholders = GameObject.FindGameObjectsWithTag("MolePlaceholder");
 		for (int i = 0; i < _placeholders.Length; i++)
 		{
 			List<GameObject> moles = GameController.refs.prefabs.levelEasy.moles;
@@ -79,5 +77,10 @@ public class Engine : MonoBehaviour
 			_moles.Add(Instantiate<GameObject>(moles[index], _placeholders[i].transform.position, Quaternion.identity, _placeholders[i].transform.parent).GetComponent<Mole>());
 			Destroy(_placeholders[i].gameObject);
 		}
+	}
+
+	private void Reset()
+	{
+		_moles.Where(mole => mole.IsVisible == false).ToList().ForEach(m=>m.HideImmediately());
 	}
 }

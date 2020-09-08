@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using DG.Tweening;
 
@@ -22,13 +21,14 @@ public class Mole : MonoBehaviour
 
 	public bool IsVisible { get; private set; }
 	
+	private float _aliveTime = 10f;
 	private float _targetYPos = 0f;
 	private Vector3 _originalPos;
 	private Renderer _renderer;
 	private Material _material;
 	private Tweener _tweenCoreColor;
 	private Tweener _tweenCoreLight;
-	private IEnumerator _coroutine;
+	private Tween _delayedTween;
 
 	private void Start()
 	{
@@ -48,16 +48,23 @@ public class Mole : MonoBehaviour
 
 	private void Update()
 	{
-		transform.position = Vector3.Lerp(transform.position, new Vector3(_originalPos.x, _targetYPos, _originalPos.z), Time.deltaTime * speed);
+		if (StateManager.isPaused) return;
+		transform.position = Vector3.Lerp(transform.position, new Vector3(_originalPos.x, _targetYPos, _originalPos.z), Time.deltaTime * (IsVisible ? speed * 3f : speed));
 		float diff = Mathf.Abs((IsVisible ? _showYPos : _hideYPos) - transform.position.y);
 		if (!IsVisible && diff < .001f) _renderer.enabled = false;
+
+		_aliveTime -= Time.deltaTime;
+		if (_aliveTime <= 0f)
+		{
+			if(_delayedTween != null) _delayedTween.Kill();
+			_delayedTween = DOVirtual.DelayedCall(.2f, Hide);
+			_aliveTime = _moleData.aliveTime;
+		}
 	}
 
 	private void OnMouseDown()
 	{
 		if (!IsVisible || StateManager.state != GameState.InGameScreen) return;
-
-		if(_coroutine != null) StopCoroutine(_coroutine);
 
 		AudioManager.PlaySound(_moleData.GetWhackSound());
 		StateManager.gameEvent.Invoke(GameEvent.Whack);
@@ -66,9 +73,9 @@ public class Mole : MonoBehaviour
 
 		_tweenCoreColor.Play();
 		_tweenCoreLight.Play();
-		
-		_coroutine = WaitAndHide(.2f);
-		StartCoroutine(_coroutine);
+
+		if(_delayedTween != null) _delayedTween.Kill();
+		_delayedTween = DOVirtual.DelayedCall(.2f, Hide);
 	}
 
 	/**
@@ -81,18 +88,13 @@ public class Mole : MonoBehaviour
 		_renderer.enabled = true;
 		IsVisible = true;
 		_targetYPos = _showYPos;
-
-		if(_coroutine != null) StopCoroutine(_coroutine);
-		_coroutine = WaitAndHide(_moleData.aliveTime, true);
-		StartCoroutine(_coroutine);
+		_aliveTime = _moleData.aliveTime;
 	}
 
-	private IEnumerator WaitAndHide(float delay, bool takeLife = false)
+	public void HideImmediately()
 	{
-		yield return new WaitForSeconds(delay);
 		Hide();
-		if(takeLife) GameController.refs.gameController.TakeLife();
-		yield return null;
+		transform.position =new Vector3(_originalPos.x, _hideYPos, _originalPos.z);
 	}
 
 	/**

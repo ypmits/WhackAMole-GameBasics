@@ -36,7 +36,6 @@ public class Scaler : MonoBehaviour
 		Vector3 s = transform.localScale;
 		if (_scaleX != null) s.x = _originalScale.x + _scaleX.Calculate(transform).x;
 		if (_scaleY != null) s.y = _originalScale.y + _scaleY.Calculate(transform).y;
-		Debug.Log(_scaleX.Calculate(transform));
 		transform.localScale = s;
 	}
 

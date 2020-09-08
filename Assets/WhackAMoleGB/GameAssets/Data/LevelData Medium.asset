@@ -13,11 +13,13 @@ MonoBehaviour:
   m_Name: LevelData Medium
   m_EditorClassIdentifier: 
   difficulty: 1
-  startSpeed: 3
+  spawnSpeed: 3
   timeBased: 1
-  speedMultiplier: 0.89
+  moleSpawnDecrement: 0.89
   totalTime: 20
-  explanation: This is the medium mode. This level lasts 20 seconds.
+  timeUsedWhenClicked: 0.5
+  explanation: This is the medium mode. This level lasts {{totalTime}} seconds. Getting
+    a hiscore on Medium-mode is not gonna hold because of the time-restriction.
   moles:
   - {fileID: 7802383442674905744, guid: 4bfed2b1b32212047b534c1d463d3f75, type: 3}
   - {fileID: 7802383442674905744, guid: 3db9310693910c94d92ed27208a09f26, type: 3}
