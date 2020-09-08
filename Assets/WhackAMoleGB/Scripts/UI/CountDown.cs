@@ -46,12 +46,11 @@ public class CountDown : MonoBehaviour
 	<summary>
 	</summary>
 	*/
-	public void StartCountDown(UnityAction action = null, float countDelay = .5f)
+	public void StartCountDown(UnityAction action = null)
 	{
 		_currentImageIndex = 0;
 		_current = 3;
 		_action = action;
-		_delay = countDelay;
 		isCountingDown = true;
 
 		if(_currentTransforms != null && _currentTransforms.Count > 0) _currentTransforms.ForEach(transform=>transform.DOKill());

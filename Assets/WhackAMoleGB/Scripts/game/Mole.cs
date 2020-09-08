@@ -3,7 +3,7 @@ using DG.Tweening;
 
 /**
 <summary>
-This is the base-object
+The object that has to be clicked to remove him
 </summary>
 */
 public class Mole : MonoBehaviour
@@ -13,9 +13,7 @@ public class Mole : MonoBehaviour
 	[SerializeField] private float _showYPos = 0f;
 	[SerializeField] private float _hideYPos = 0f;
 	[SerializeField] private MoleData _moleData;
-	[SerializeField] private float speed = 1f;
 	[SerializeField] private Light _light;
-	[SerializeField, Range(.1f, 2f)] private float _maxLightIntensity = .7f;
 	[SerializeField, ColorUsage(true, true)] private Color32 _fromColor;
 #pragma warning restore 649
 
@@ -29,6 +27,7 @@ public class Mole : MonoBehaviour
 	private Tweener _tweenCoreColor;
 	private Tweener _tweenCoreLight;
 	private Tween _delayedTween;
+	private GameObject _groundParticles;
 
 	private void Start()
 	{
@@ -43,16 +42,18 @@ public class Mole : MonoBehaviour
 		Ease ease = Ease.InOutCubic;
 		float delay = .15f;
 		_tweenCoreColor = _material.DOColor(Color.black, "_EmissionColor", duration).From(_fromColor, false).SetEase(ease).SetDelay(delay).Pause();
-		_tweenCoreLight = _light.DOIntensity(0f, duration).From(_maxLightIntensity, false).SetEase(ease).SetDelay(delay).Pause();
+		_tweenCoreLight = _light.DOIntensity(0f, duration).From(_moleData.maxLightIntensity, false).SetEase(ease).SetDelay(delay).Pause();
 	}
 
 	private void Update()
 	{
 		if (StateManager.isPaused) return;
-		transform.position = Vector3.Lerp(transform.position, new Vector3(_originalPos.x, _targetYPos, _originalPos.z), Time.deltaTime * (IsVisible ? speed * 3f : speed));
+
+		transform.position = Vector3.Lerp(transform.position, new Vector3(_originalPos.x, _targetYPos, _originalPos.z), Time.deltaTime * (IsVisible ? _moleData.speed * 3f : _moleData.speed));
 		float diff = Mathf.Abs((IsVisible ? _showYPos : _hideYPos) - transform.position.y);
 		if (!IsVisible && diff < .001f) _renderer.enabled = false;
 
+		if(!IsVisible) return;
 		_aliveTime -= Time.deltaTime;
 		if (_aliveTime <= 0f)
 		{
@@ -78,6 +79,17 @@ public class Mole : MonoBehaviour
 		_delayedTween = DOVirtual.DelayedCall(.2f, Hide);
 	}
 
+	private void InitGroundParticles()
+	{
+		Vector3 pos = transform.position;
+		pos.y = -0.49f;
+		_groundParticles = Instantiate<GameObject>(GameController.refs.prefabs.groundParticles, pos, Quaternion.identity);
+		_groundParticles.GetComponent<ParticleSystem>().Play();
+		DOVirtual.DelayedCall(2f, ()=>{Destroy(_groundParticles);});
+	}
+
+
+
 	/**
 	<summary>
 	</summary>
@@ -86,6 +98,7 @@ public class Mole : MonoBehaviour
 	{
 		if (IsVisible) return;
 		_renderer.enabled = true;
+		InitGroundParticles();
 		IsVisible = true;
 		_targetYPos = _showYPos;
 		_aliveTime = _moleData.aliveTime;

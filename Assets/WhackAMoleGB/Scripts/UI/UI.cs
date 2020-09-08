@@ -113,6 +113,7 @@ public class UI : MonoBehaviour
 					timer.Reset();
 					gameOver.Hide();
 					background.Hide();
+					pauseScreen.Hide();
 					timer.Reset();
 					StateManager.gameEvent.Invoke(GameEvent.StartCountDown);
 					break;
@@ -189,6 +190,7 @@ public class UI : MonoBehaviour
 		gameOver.Hide();
 		pauseScreen.Hide();
 		pauseButton.Hide();
+		lifeCounterObjects.Hide();
 		// scoresScreen.Hide();
 		scoresScreen.ShowHiScoreOnly();
 		newHiScore.HideImmediately();
@@ -219,7 +221,7 @@ public class UI : MonoBehaviour
 		countdown.StartCountDown(() =>
 		{
 			StateManager.gameEvent.Invoke(GameEvent.StartGame);
-		}, .3f);
+		});
 		yield return null;
 	}
 }
