@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: add4587467f9bd54e85ec057103cddd7, type: 3}
-  m_Name: MoleData Level Medium
+  m_Name: MoleData Level Normal
   m_EditorClassIdentifier: 
   whackSounds:
   - {fileID: 8300000, guid: beb818bb776c70d45827e5e7e67bab3f, type: 3}
@@ -27,6 +27,6 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 2c7ae65715e408f438e6e32ce22751e7, type: 3}
   - {fileID: 8300000, guid: fe1dbed83eae728428779efc4f7e6fe8, type: 3}
   goBackSound: {fileID: 8300000, guid: 9250ffbfb15b0c04ba5dae60de0e8705, type: 3}
-  aliveTime: 1
-  speed: 1
+  aliveTime: 1.6
+  speed: 10
   maxLightIntensity: 0.7

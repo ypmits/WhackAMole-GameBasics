@@ -115,9 +115,7 @@ MonoBehaviour:
   _showYPos: 0
   _hideYPos: -1.5
   _moleData: {fileID: 11400000, guid: cdb4c7a041b54a04fbef4a151b3dc4f4, type: 2}
-  speed: 7
   _light: {fileID: 4465493038887083846}
-  _maxLightIntensity: 0.7
   _fromColor:
     serializedVersion: 2
     rgba: 4294967295

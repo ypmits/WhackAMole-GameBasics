@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public enum Difficulty { Easy, Medium, Hard }
+public enum Difficulty { Easy, Normal, Hard }
 [CreateAssetMenu(fileName = "LevelData", menuName = "WhackAMoleGamebasics/LevelData", order = 0)]
 public class LevelData : ScriptableObject {
 	[Tooltip("The difficulty of the level. Every level has it's own parameters")] public Difficulty difficulty = Difficulty.Easy;

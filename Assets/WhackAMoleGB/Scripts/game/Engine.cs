@@ -21,6 +21,7 @@ public class Engine : MonoBehaviour
 			switch (e)
 			{
 				case GameEvent.StartCountDown:
+					StateManager.isPaused = true;
 					gameTimer = Model.levelData.totalTime;
 					Reset();
 					break;
@@ -28,9 +29,10 @@ public class Engine : MonoBehaviour
 				case GameEvent.StartGame:
 				case GameEvent.RestartGame:
 					// First set the _spawnSpeed (how long it takes for the moles to spawn) to the level's startSpeed
+					StateManager.isPaused = false;
+					Reset();
 					_spawnSpeed = Model.levelData.spawnSpeed;
 					_spawnDecrement = Model.levelData.moleSpawnDecrement;
-					StateManager.isPaused = false;
 					break;
 
 				case GameEvent.Pause:
@@ -79,8 +81,27 @@ public class Engine : MonoBehaviour
 		}
 	}
 
+	/**
+	<summary>
+	Replaces the moles with the moles from the right difficulty-level:
+	</summary>
+	*/
+	public void ReplaceMoles()
+	{
+		_moles.Clear();
+		GameObject[] _currentMoles = GameObject.FindGameObjectsWithTag("Mole");
+		for (int i = 0; i < _currentMoles.Length; i++)
+		{
+			List<GameObject> moles = Model.levelData.moles;
+
+			int index = Random.Range(0, moles.Count);
+			_moles.Add(Instantiate<GameObject>(moles[index], _currentMoles[i].transform.position, Quaternion.identity, _currentMoles[i].transform.parent).GetComponent<Mole>());
+			Destroy(_currentMoles[i].gameObject);
+		}
+	}
+
 	private void Reset()
 	{
-		_moles.Where(mole => mole.IsVisible == false).ToList().ForEach(m=>m.HideImmediately());
+		_moles.Where(mole => mole.IsVisible).ToList().ForEach(m=>m.HideImmediately());
 	}
 }

@@ -10,12 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: be1d174f85cbc6b42b2831bd321c89be, type: 3}
-  m_Name: LevelData Medium
+  m_Name: LevelData Normal
   m_EditorClassIdentifier: 
   difficulty: 1
   spawnSpeed: 3
   timeBased: 1
   moleSpawnDecrement: 0.89
+  minimumSpawnDecrement: 0.95
   totalTime: 20
   timeUsedWhenClicked: 0.5
   explanation: This is the medium mode. This level lasts {{totalTime}} seconds. Getting

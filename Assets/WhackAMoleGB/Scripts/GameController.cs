@@ -29,22 +29,21 @@ public class GameController : MonoBehaviour
 		ScoreManager.Reset();
 
 		// Initialize the AudioManager
-		// Important! note that the 'sound' is set to 'true' since this is a simple app where we're not using any preferences
+		// Important! note that the 'sound' and 'music' are set to 'true' since I want to show off the
+		// sound-capabilities and this is a simple app where we're not using any preferences
 		AudioManager.sound = AudioManager.music = true;
 		AudioManager.AttachAudioSources(gameObject);
 
-		// Setup the GameEvent-listener:
-		// From here all the states are set:
+		// Setup the GameEvent-listener
 		StateManager.gameEvent.AddListener((GameEvent e) =>
 		{
 			switch (e)
 			{
 				case GameEvent.GoHome:
-					StateManager.state =GameState.HomeScreen;
+					StateManager.state = GameState.HomeScreen;
 					break;
 
 				case GameEvent.StartGame:
-					StateManager.isAlive = true;
 					StateManager.state = GameState.InGameScreen;
 					ScoreManager.Reset();
 					break;
@@ -55,7 +54,6 @@ public class GameController : MonoBehaviour
 					break;
 				
 				case GameEvent.GameOver:
-					StateManager.isAlive = false;
 					StateManager.state = GameState.GameOverScreen;
 					break;
 
@@ -68,5 +66,12 @@ public class GameController : MonoBehaviour
 		yield return new WaitForEndOfFrame();
 		StateManager.gameEvent.Invoke(GameEvent.GoHome);
 		yield return null;
+	}
+
+	public static void SetDifficulty(Difficulty difficulty)
+	{
+		Model.levelData = GameController.refs.prefabs.GetLevelData(difficulty);
+		refs.engine.ReplaceMoles();
+		StateManager.gameEvent.Invoke(GameEvent.ShowExplanation); 
 	}
 }

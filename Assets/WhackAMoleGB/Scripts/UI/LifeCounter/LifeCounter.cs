@@ -12,7 +12,7 @@ public class LifeCounter : MonoBehaviour
 #pragma warning disable 649
 	[SerializeField] private Image _image;
 	[SerializeField] private Image _errorImage;
-	[SerializeField] private float _showYPos = 30f;
+	[SerializeField] private float _showYPos = -30f;
 	[SerializeField] private float _hideYPos = -250f;
 #pragma warning restore 649
 	private bool isShowing;

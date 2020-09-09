@@ -13,10 +13,11 @@
 ## Development Setup:
 - The game is simple and is mostly contained in the GameController- and Engine-class
 - The UI is the biggest actor on stage here
-  - Every button, textfield and most graphics can be found here
+  - All UI-graphics can be found here
+- Sorry, no settings- or preferences-page to change sounds ;)
 
 ## Dependencies:
 - DOTween (http://dotween.demigiant.com/)
 
 ## Devices:
-- Only iOS has been tested for now
+- Only iOS has been tested for now but Android should work
