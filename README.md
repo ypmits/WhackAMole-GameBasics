@@ -17,3 +17,6 @@
 
 ## Dependencies:
 - DOTween (http://dotween.demigiant.com/)
+
+## Devices:
+- Only iOS has been tested for now
