@@ -4,7 +4,7 @@ using UnityEngine;
 
 /**
 <summary>
-The document-class
+Could be seen as the document-class. Taking the center of the complete app.
 </summary>
 */
 public class GameController : MonoBehaviour
@@ -15,7 +15,6 @@ public class GameController : MonoBehaviour
 	[SerializeField] private Prefabs _prefabs;
 #pragma warning restore 649
 	public static References refs;
-	private LevelData _levelData;
 
 	/**
 	<summary>
@@ -23,14 +22,15 @@ public class GameController : MonoBehaviour
 	*/
 	private void Awake()
 	{
-		// Setup the references:
+		// Setup the references
 		GameController.refs = new References(this, _ui, _gameEngine, _prefabs);
 
-		// Reset the scores:
+		// Reset the scores
 		ScoreManager.Reset();
 
-		// Initialize the AudioManager. Important! set the 'sound' to 'true' since we're not using any preferences in this app:
-		AudioManager.sound = true;
+		// Initialize the AudioManager
+		// Important! note that the 'sound' is set to 'true' since this is a simple app where we're not using any preferences
+		AudioManager.sound = AudioManager.music = true;
 		AudioManager.AttachAudioSources(gameObject);
 
 		// Setup the GameEvent-listener:
@@ -68,10 +68,5 @@ public class GameController : MonoBehaviour
 		yield return new WaitForEndOfFrame();
 		StateManager.gameEvent.Invoke(GameEvent.GoHome);
 		yield return null;
-	}
-
-	public void TakeLife()
-	{
-		GameController.refs.ui.lifeCounterObjects.TakeLife();
 	}
 }

@@ -14,3 +14,6 @@
 - The game is simple and is mostly contained in the GameController- and Engine-class
 - The UI is the biggest actor on stage here
   - Every button, textfield and most graphics can be found here
+
+## Dependencies:
+- DOTween (http://dotween.demigiant.com/)

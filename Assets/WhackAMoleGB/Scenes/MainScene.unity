@@ -1044,7 +1044,7 @@ Terrain:
   m_DrawInstanced: 0
   m_DrawTreesAndFoliage: 1
   m_ReflectionProbeUsage: 1
-  m_MaterialTemplate: {fileID: 2100000, guid: 08c745c3648654ccd99a246b8921b1aa, type: 2}
+  m_MaterialTemplate: {fileID: 2100000, guid: 9b1ba032b7dd14b899a179bf5f926c15, type: 2}
   m_BakeLightProbesForTrees: 1
   m_PreserveTreePrototypeLayers: 0
   m_DeringLightProbesForTrees: 1
@@ -5003,10 +5003,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _backgroundImage: {fileID: 1260747561}
-  _explanationText: {fileID: 902388200}
-  _buttonLetsGo: {fileID: 1547374202}
   _buttonPause: {fileID: 1893762733}
   _newHiScore: {fileID: 849508819}
+  _explanationText: {fileID: 902388200}
+  _buttonLetsGo: {fileID: 1547374202}
   _titleText: {fileID: 1471960507}
   _buttonEasy: {fileID: 1815953714}
   _buttonMedium: {fileID: 15879959}

@@ -17,4 +17,16 @@ MonoBehaviour:
   - {fileID: 8300000, guid: e545df542906f994c98807e1af5b6a9d, type: 3}
   - {fileID: 8300000, guid: 6fc1fe1fe861c8043b45b069023caa8a, type: 3}
   - {fileID: 8300000, guid: 2d2bf97ebf6af70418fcee66fbe31488, type: 3}
+  popupSound: {fileID: 8300000, guid: 7e569f76364298b49864ae4f0742b7e6, type: 3}
+  hitSounds:
+  - {fileID: 8300000, guid: 6850efdc8e5a3754ea1ff85888e6a129, type: 3}
+  - {fileID: 8300000, guid: 4651beb890301754aa0fc3660b7673e7, type: 3}
+  - {fileID: 8300000, guid: 3cf6b0043d0e60e498c84d31b73af8e8, type: 3}
+  - {fileID: 8300000, guid: 66ab1f567ff425646a3c304066ee1d9c, type: 3}
+  - {fileID: 8300000, guid: 910aaa00e09bc3045bf780339bb70575, type: 3}
+  - {fileID: 8300000, guid: 2c7ae65715e408f438e6e32ce22751e7, type: 3}
+  - {fileID: 8300000, guid: fe1dbed83eae728428779efc4f7e6fe8, type: 3}
+  goBackSound: {fileID: 8300000, guid: 9250ffbfb15b0c04ba5dae60de0e8705, type: 3}
   aliveTime: 0.5
+  speed: 1
+  maxLightIntensity: 0.7

@@ -10,30 +10,31 @@ using System.Text;
 public class UI : MonoBehaviour
 {
 #pragma warning disable 649
-	[Header("General-assetGroup")]
+	[Header("General")]
 	[SerializeField] private Image _backgroundImage;
-	[SerializeField] private TextMeshProUGUI _explanationText;
-	[SerializeField] private Button _buttonLetsGo;
 	[SerializeField] private Button _buttonPause;
 	[SerializeField] private GameObject _newHiScore;
-	[Header("StartScreen-assetGroup")]
+	[Header("ExplanationScreen")]
+	[SerializeField] private TextMeshProUGUI _explanationText;
+	[SerializeField] private Button _buttonLetsGo;
+	[Header("StartScreen")]
 	[SerializeField] private GameObject _titleText;
 	[SerializeField] private Button _buttonEasy;
 	[SerializeField] private Button _buttonMedium;
 	[SerializeField] private Button _buttonHard;
-	[Header("Score-assetGroup")]
+	[Header("ScoreScreen")]
 	[SerializeField] private TextMeshProUGUI _scoreText;
 	[SerializeField] private TextMeshProUGUI _hiscoreText;
 	[SerializeField] private LifeCounterObjects _lifeCounterObjects;
-	[Header("Timer-assetGroup")]
+	[Header("Timer")]
 	[SerializeField] private CountDown _countdown;
 	[SerializeField] private VisualTimer _timer;
-	[Header("PauseScreen-assetGroup")]
+	[Header("PauseScreen")]
 	[SerializeField] private TextMeshProUGUI _pauseText;
 	[SerializeField] private Button _continueButton;
 	[SerializeField] private Button _restartButton_pause;
 	[SerializeField] private Button _goHomeButton_pause;
-	[Header("GameOverScreen-assetGroup")]
+	[Header("GameOverScreen")]
 	[SerializeField] private TextMeshProUGUI _gameOverText;
 	[SerializeField] private Button _restartButton_gameover;
 	[SerializeField] private Button _goHomeButton_gameover;
@@ -49,7 +50,7 @@ public class UI : MonoBehaviour
 	public UIStartScreen startScreen { get; private set; }
 	public UIPauseScreen pauseScreen { get; private set; }
 	public UIScoresScreen scoresScreen { get; private set; }
-	public UIGameOverScreen gameOver { get; private set; }
+	public UIGameOverScreen gameOverScreen { get; private set; }
 	public LifeCounterObjects lifeCounterObjects => _lifeCounterObjects;
 	public CountDown countdown => _countdown;
 	public VisualTimer timer => _timer;
@@ -60,25 +61,56 @@ public class UI : MonoBehaviour
 
 	private void Awake()
 	{
+		Prefabs prefabs = GameController.refs.prefabs;
 		// Reusable components:
-		UIButton buttonRestart_pause = new UIButton(_restartButton_pause, () => { StateManager.gameEvent.Invoke(GameEvent.RestartGame); });
-		UIButton buttonRestart_gameover = new UIButton(_restartButton_gameover, () => { StateManager.gameEvent.Invoke(GameEvent.RestartGame); });
-		UIButton buttonEasy = new UIButton(_buttonEasy, () => { Model.levelData = GameController.refs.prefabs.levelEasy; StateManager.gameEvent.Invoke(GameEvent.ShowExplanation); });
-		UIButton buttonMedium = new UIButton(_buttonMedium, () => { Model.levelData = GameController.refs.prefabs.levelMedium; StateManager.gameEvent.Invoke(GameEvent.ShowExplanation); });
-		UIButton buttonHard = new UIButton(_buttonHard, () => { Model.levelData = GameController.refs.prefabs.levelHard; StateManager.gameEvent.Invoke(GameEvent.ShowExplanation); });
-		UIButton buttonLetsGo = new UIButton(_buttonLetsGo, () => { StateManager.gameEvent.Invoke(GameEvent.StartCountDown); });
-		UIButton buttonGoHome_pause = new UIButton(_goHomeButton_pause, () => { StateManager.gameEvent.Invoke(GameEvent.GoHome); });
-		UIButton buttonGoHome_gameover = new UIButton(_goHomeButton_gameover, () => { StateManager.gameEvent.Invoke(GameEvent.GoHome); });
-		UIButton buttonContinue = new UIButton(_continueButton, () => { StateManager.gameEvent.Invoke(GameEvent.Continue); });
+		UIButton buttonRestart_pause = new UIButton(_restartButton_pause, () => {
+			StateManager.gameEvent.Invoke(GameEvent.RestartGame); 
+		});
+		UIButton buttonRestart_gameover = new UIButton(_restartButton_gameover, () => {
+			StateManager.gameEvent.Invoke(GameEvent.RestartGame); 
+		});
+		UIButton buttonEasy = new UIButton(_buttonEasy, () => {
+			AudioManager.PlaySound(prefabs.buttonClick);
+			Model.levelData = GameController.refs.prefabs.levelEasy;
+			StateManager.gameEvent.Invoke(GameEvent.ShowExplanation); 
+		});
+		UIButton buttonMedium = new UIButton(_buttonMedium, () => {
+			AudioManager.PlaySound(prefabs.buttonClick);
+			Model.levelData = GameController.refs.prefabs.levelMedium;
+			StateManager.gameEvent.Invoke(GameEvent.ShowExplanation); 
+		});
+		UIButton buttonHard = new UIButton(_buttonHard, () => {
+			AudioManager.PlaySound(prefabs.buttonClick);
+			Model.levelData = GameController.refs.prefabs.levelHard;
+			StateManager.gameEvent.Invoke(GameEvent.ShowExplanation); 
+		});
+		UIButton buttonLetsGo = new UIButton(_buttonLetsGo, () => {
+			AudioManager.PlaySound(prefabs.buttonClickConfirm);
+			StateManager.gameEvent.Invoke(GameEvent.StartCountDown); 
+		});
+		UIButton buttonGoHome_pause = new UIButton(_goHomeButton_pause, () => {
+			AudioManager.PlaySound(prefabs.buttonClickBack);
+			StateManager.gameEvent.Invoke(GameEvent.GoHome); 
+		});
+		UIButton buttonGoHome_gameover = new UIButton(_goHomeButton_gameover, () => {
+			AudioManager.PlaySound(prefabs.buttonClickBack);
+			StateManager.gameEvent.Invoke(GameEvent.GoHome); 
+		});
+		UIButton buttonContinue = new UIButton(_continueButton, () => {
+			AudioManager.PlaySound(prefabs.buttonClickConfirm);
+			StateManager.gameEvent.Invoke(GameEvent.Continue); 
+		});
 
 		newHiScore = new UIScaler(_newHiScore);
-		pauseButton = new UIButton(_buttonPause, () => { StateManager.gameEvent.Invoke(GameEvent.Pause); });
+		pauseButton = new UIButton(_buttonPause, () => {
+			AudioManager.PlaySound(prefabs.buttonClickBack);
+			StateManager.gameEvent.Invoke(GameEvent.Pause); });
 		background = new UIImage(_backgroundImage);
 		explanation = new UIExplanationScreen(this, new UIText(_explanationText), buttonLetsGo);
 		startScreen = new UIStartScreen(this, new UIScaler(_titleText), buttonEasy, buttonMedium, buttonHard);
 		pauseScreen = new UIPauseScreen(this, new UIText(_pauseText), buttonContinue, buttonRestart_pause, buttonGoHome_pause);
 		scoresScreen = new UIScoresScreen(this, _scoreText, _hiscoreText, _lifeCounterObjects);
-		gameOver = new UIGameOverScreen(this, new UIText(_gameOverText), new UIText(_yourScoreText), new UIText(_hiScoreGameOverText), buttonRestart_gameover, buttonGoHome_gameover);
+		gameOverScreen = new UIGameOverScreen(this, new UIText(_gameOverText), new UIText(_yourScoreText), new UIText(_hiScoreGameOverText), buttonRestart_gameover, buttonGoHome_gameover);
 
 		timer.completeAction = () => StateManager.gameEvent.Invoke(GameEvent.GameOver);
 	}
@@ -90,6 +122,7 @@ public class UI : MonoBehaviour
 			switch (e)
 			{
 				case GameEvent.GoHome:
+					AudioManager.PlayMusic(GameController.refs.prefabs.musicMenu);
 					if (_coroutine != null) StopCoroutine(_coroutine);
 					_coroutine = ShowHomeScreen(.5f);
 					StartCoroutine(_coroutine);
@@ -102,6 +135,7 @@ public class UI : MonoBehaviour
 					break;
 
 				case GameEvent.StartCountDown:
+					AudioManager.StopMusic();
 					if (_coroutine != null) StopCoroutine(_coroutine);
 					_coroutine = ShowCountdown(.5f);
 					StartCoroutine(_coroutine);
@@ -111,7 +145,7 @@ public class UI : MonoBehaviour
 				case GameEvent.RestartGame:
 					lifeCounterObjects.Reset();
 					timer.Reset();
-					gameOver.Hide();
+					gameOverScreen.Hide();
 					background.Hide();
 					pauseScreen.Hide();
 					timer.Reset();
@@ -119,9 +153,10 @@ public class UI : MonoBehaviour
 					break;
 
 				case GameEvent.StartGame:
+					AudioManager.PlayMusic(GameController.refs.prefabs.musicGame);
 					lifeCounterObjects.Reset();
 					timer.Reset();
-					gameOver.Hide();
+					gameOverScreen.Hide();
 					background.Hide();
 					pauseButton.Show();
 					scoresScreen.Show();
@@ -130,6 +165,8 @@ public class UI : MonoBehaviour
 					break;
 
 				case GameEvent.GameOver:
+					AudioManager.StopMusic();
+					AudioManager.PlaySound(GameController.refs.prefabs.failureTune);
 					bool newHiscore = ScoreManager.CheckHIScores();
 					if (newHiscore)
 					{
@@ -142,7 +179,7 @@ public class UI : MonoBehaviour
 					_yourScoreText.text = $"Your score: {ScoreManager.score.ToString()}";
 					_hiScoreGameOverText.text = $"Hiscore: {ScoreManager.hiscore.ToString()}";
 					scoresScreen.UpdateScore();
-					gameOver.Show();
+					gameOverScreen.Show();
 					pauseButton.Hide();
 					background.Show();
 					lifeCounterObjects.Hide();
@@ -150,6 +187,7 @@ public class UI : MonoBehaviour
 					break;
 
 				case GameEvent.Pause:
+					AudioManager.PitchMusic(.3f);
 					background.Show();
 					pauseScreen.Show();
 					pauseButton.Hide();
@@ -158,6 +196,7 @@ public class UI : MonoBehaviour
 					break;
 
 				case GameEvent.Continue:
+					AudioManager.PitchMusic(1f);
 					background.Hide();
 					pauseScreen.Hide();
 					pauseButton.Show();
@@ -187,7 +226,7 @@ public class UI : MonoBehaviour
 
 	private IEnumerator ShowHomeScreen(float delay)
 	{
-		gameOver.Hide();
+		gameOverScreen.Hide();
 		pauseScreen.Hide();
 		pauseButton.Hide();
 		lifeCounterObjects.Hide();

@@ -1,5 +1,6 @@
 using UnityEngine;
 using DG.Tweening;
+using System.Collections;
 
 /**
 <summary>
@@ -57,9 +58,12 @@ public class Mole : MonoBehaviour
 		_aliveTime -= Time.deltaTime;
 		if (_aliveTime <= 0f)
 		{
+			AudioManager.PlaySound(_moleData.goBackSound);
 			if(_delayedTween != null) _delayedTween.Kill();
 			_delayedTween = DOVirtual.DelayedCall(.2f, Hide);
 			_aliveTime = _moleData.aliveTime;
+
+			GameController.refs.ui.lifeCounterObjects.TakeLife();
 		}
 	}
 
@@ -67,7 +71,7 @@ public class Mole : MonoBehaviour
 	{
 		if (!IsVisible || StateManager.state != GameState.InGameScreen) return;
 
-		AudioManager.PlaySound(_moleData.GetWhackSound());
+		StartCoroutine(GettingHitSounds(.15f));
 		StateManager.gameEvent.Invoke(GameEvent.Whack);
 
 		if (_clickParticles) _clickParticles.Play();
@@ -79,12 +83,21 @@ public class Mole : MonoBehaviour
 		_delayedTween = DOVirtual.DelayedCall(.2f, Hide);
 	}
 
+	private IEnumerator GettingHitSounds(float delay)
+	{
+		AudioManager.PlaySound(_moleData.GetWhackSound());
+		yield return new WaitForSeconds(delay);
+		AudioManager.PlaySound(_moleData.GetHitSound());
+		yield return null;
+	}
+
 	private void InitGroundParticles()
 	{
 		Vector3 pos = transform.position;
 		pos.y = -0.49f;
 		_groundParticles = Instantiate<GameObject>(GameController.refs.prefabs.groundParticles, pos, Quaternion.identity);
 		_groundParticles.GetComponent<ParticleSystem>().Play();
+
 		DOVirtual.DelayedCall(2f, ()=>{Destroy(_groundParticles);});
 	}
 
@@ -98,6 +111,7 @@ public class Mole : MonoBehaviour
 	{
 		if (IsVisible) return;
 		_renderer.enabled = true;
+		AudioManager.PlaySound(_moleData.popupSound);
 		InitGroundParticles();
 		IsVisible = true;
 		_targetYPos = _showYPos;

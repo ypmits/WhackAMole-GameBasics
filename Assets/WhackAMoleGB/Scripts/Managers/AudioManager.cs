@@ -1,3 +1,4 @@
+using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
@@ -13,6 +14,8 @@ AudioManager can read and write to the PlayerPrefs
 	- You can change these strings through the static variables: 'PlayerPrefs_soundffx' and 'PlayerPrefs_music'
 AudioManager can attach seperate AudioSources for music and effects through 'AttachAudioSources(GameObject)'
 AudioManager can 'Pause' and 'Resume' which will pitch the music
+
+Dependency: DOTween (http://dotween.demigiant.com/)
 </summary>
 */
 public class AudioManager
@@ -23,7 +26,7 @@ public class AudioManager
 	private static AudioSource _audioSourceMusic;
 	private static bool _hasSoundFFX;
 	private static bool _hasMusic;
-	private static float _savedMusicPitch = 1f; 
+	private static float _savedMusicPitch = 1f;
 
 	public static float savedMusicPitch { get { return _savedMusicPitch; } }
 
@@ -53,22 +56,31 @@ public class AudioManager
 	}
 
 
+	/**
+	<summary>
+	plays a clip through the _audioSource
+	</summary> 
+	*/
 	public static void PlaySound(AudioClip clip, float delay = 0f, float volumeScale = 1f)
 	{
 		if (!_audioSource || !sound || !clip) return;
-		DOVirtual.DelayedCall(delay, () => {
-			_audioSource.PlayOneShot(clip, volumeScale);
-		});
+		if (delay > 0f) DOVirtual.DelayedCall(delay, () => { APlayClip(clip, volumeScale); });
+		else APlayClip(clip, volumeScale);
 	}
 
 	public static void PlayClipForDuration(AudioClip clip, float duration, float delay = 0f, float volumeScale = 1f)
 	{
 		if (!_audioSource || !sound || !clip) return;
 		else _audioSource = Camera.main.gameObject.GetComponent<AudioSource>();
-		DOVirtual.DelayedCall(delay, () => {
-			_audioSource.pitch = clip.length / duration;
-			_audioSource.PlayOneShot(clip, volumeScale);
-		});
+		if (delay > 0f)
+			DOVirtual.DelayedCall(delay, () => { _audioSource.pitch = clip.length / duration; });
+		else _audioSource.pitch = clip.length / duration;
+		APlayClip(clip, volumeScale);
+	}
+
+	private static void APlayClip(AudioClip clip, float volumeScale = 1f)
+	{
+		_audioSource.PlayOneShot(clip, volumeScale);
 	}
 
 	public static void PlaySoundAtPosition(AudioClip sound, Vector3 position)
@@ -103,7 +115,7 @@ public class AudioManager
 		_audioSourceMusic.loop = loop;
 		_audioSourceMusic.volume = volume;
 		if (_audioSourceMusic.isPlaying)
-		{ 
+		{
 			_audioSourceMusic.DOFade(0f, .2f).SetEase(Ease.InOutCubic).OnComplete(() =>
 			{
 				_audioSourceMusic.Stop();
@@ -130,16 +142,11 @@ public class AudioManager
 		_audioSourceMusic.DOPitch(toPitch, duration).SetEase(ease);
 	}
 
-	public static void ToggleMusic()
-	{
-		AudioManager.music = !AudioManager.music;
-		if (AudioManager.music) AudioManager.ResumeMusic(); else AudioManager.StopMusic();
-	}
-
-	public static void StopMusic(bool fadeOut = true)
+	public static void StopMusic(bool fadeOut = true, float fadeOutDuration = .45f)
 	{
 		_audioSourceMusic.DOKill();
-		_audioSourceMusic.DOPitch(0f, fadeOut ? .45f : 0f).SetEase(Ease.InOutCubic).OnComplete(() => {});
+		if(fadeOut) _audioSourceMusic.DOPitch(0f, fadeOutDuration).SetEase(Ease.InOutCubic);
+		else _audioSourceMusic.pitch = 0f;
 	}
 
 	public static void ResumeMusic()
