@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0a0594eb22eb4689a5627211e1fda2c, type: 3}
+  m_Name: AllPrefabs
+  m_EditorClassIdentifier: 
+  levelEasy: {fileID: 11400000, guid: 690e14ceaa51549b794e04dbdc3389e2, type: 2}
+  levelMedium: {fileID: 11400000, guid: 05746e4bbf3d74fcc889b0562ff93043, type: 2}
+  levelHard: {fileID: 11400000, guid: 0f9fb62e490a1431cab534d1017f2437, type: 2}
+  musicMenu: {fileID: 8300000, guid: c6f33b58c2d6db747b42fe6e590bc9e2, type: 3}
+  musicGame: {fileID: 8300000, guid: 0866bb23fdee1e44f99d570bce12d842, type: 3}
+  failureTune: {fileID: 8300000, guid: f259050811c535f4d844273586a07c28, type: 3}
+  hiScoreSound: {fileID: 8300000, guid: 6afb17162fee0024b9f6bbdb875aad0b, type: 3}
+  buttonClick: {fileID: 8300000, guid: 4cecc37259db2de45b3dd404e7a05c69, type: 3}
+  buttonClickBack: {fileID: 8300000, guid: 5203c032848ad5c4fbffeee283a0a731, type: 3}
+  buttonClickConfirm: {fileID: 8300000, guid: 880d6c4ce4066a346a248785bd2b683d, type: 3}
+  groundParticles: {fileID: 2748005885273056187, guid: 26a9791f011be4b0ca46476d07437d31, type: 3}

@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be1d174f85cbc6b42b2831bd321c89be, type: 3}
+  m_Name: LevelData Normal
+  m_EditorClassIdentifier: 
+  difficulty: 1
+  spawnSpeed: 3
+  timeBased: 1
+  moleSpawnDecrement: 0.89
+  minimumSpawnDecrement: 0.95
+  totalTime: 20
+  timeUsedWhenClicked: 0.5
+  explanation: This is the medium mode. This level lasts {{totalTime}} seconds. Getting
+    a hiscore on Medium-mode is not gonna hold because of the time-restriction.
+  moles:
+  - {fileID: 7802383442674905744, guid: 4bfed2b1b32212047b534c1d463d3f75, type: 3}
+  - {fileID: 7802383442674905744, guid: 3db9310693910c94d92ed27208a09f26, type: 3}
+  - {fileID: 7802383442674905744, guid: 887acec02a54cf646a03020e1935cb8f, type: 3}

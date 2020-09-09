@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be1d174f85cbc6b42b2831bd321c89be, type: 3}
+  m_Name: LevelData Hard
+  m_EditorClassIdentifier: 
+  difficulty: 2
+  spawnSpeed: 3
+  timeBased: 0
+  moleSpawnDecrement: 0.817
+  totalTime: 10
+  timeUsedWhenClicked: 0.2
+  explanation: This is the hard mode. Moles will popup every {{startSpeed}} second.
+    You'll have no time limit here.
+  moles:
+  - {fileID: 7802383442674905744, guid: b453f917a00c724419d7443f35d24ceb, type: 3}
+  - {fileID: 7802383442674905744, guid: 20574ecb949597344b98130f3592f48c, type: 3}
+  - {fileID: 7802383442674905744, guid: ecda902bd7b7dc54aa2347df0dee98a1, type: 3}
