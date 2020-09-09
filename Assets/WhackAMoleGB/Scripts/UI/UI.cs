@@ -93,6 +93,7 @@ public class UI : MonoBehaviour
 			StateManager.gameEvent.Invoke(GameEvent.GoHome); 
 		});
 		UIButton buttonGoHome_gameover = new UIButton(_goHomeButton_gameover, () => {
+			AudioManager.StopMusic();
 			AudioManager.PlaySound(prefabs.buttonClickBack);
 			StateManager.gameEvent.Invoke(GameEvent.GoHome); 
 		});
@@ -122,7 +123,7 @@ public class UI : MonoBehaviour
 			switch (e)
 			{
 				case GameEvent.GoHome:
-					AudioManager.PlayMusic(GameController.refs.prefabs.musicMenu);
+					AudioManager.PlayMusic(GameController.refs.prefabs.musicMenu, true, 1f, 1f);
 					if (_coroutine != null) StopCoroutine(_coroutine);
 					_coroutine = ShowHomeScreen(.5f);
 					StartCoroutine(_coroutine);

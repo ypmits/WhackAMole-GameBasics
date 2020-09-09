@@ -110,10 +110,11 @@ public class AudioManager
 	usage: AudioManager.playMusic (AudioID.YouDidItPopupMelody, true, 1);
 	</summary> 
 	*/
-	public static void PlayMusic(AudioClip clip, bool loop = true, float volume = 1f)
+	public static void PlayMusic(AudioClip clip, bool loop = true, float volume = 1f, float pitch = 1f)
 	{
 		_audioSourceMusic.loop = loop;
 		_audioSourceMusic.volume = volume;
+		_audioSourceMusic.pitch = pitch;
 		if (_audioSourceMusic.isPlaying)
 		{
 			_audioSourceMusic.DOFade(0f, .2f).SetEase(Ease.InOutCubic).OnComplete(() =>
@@ -121,7 +122,7 @@ public class AudioManager
 				_audioSourceMusic.Stop();
 				_audioSourceMusic.clip = clip;
 				if (music) _audioSourceMusic.Play();
-				_audioSourceMusic.DOPitch(_savedMusicPitch, .25f).SetEase(Ease.InOutCubic);
+				_audioSourceMusic.DOPitch(pitch, .25f).SetEase(Ease.InOutCubic);
 				_audioSourceMusic.DOFade(volume, .25f).SetEase(Ease.InOutCubic);
 			});
 		}
